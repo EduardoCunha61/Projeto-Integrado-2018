@@ -1,12 +1,10 @@
-{"submissão": {
-    "ID" : 1,
-    
-    "Numero Aluno" : "A12345",
-    
-    "Resposta" : "
+{"submissao": {
+	"Numero Aluno" : "a71940",
+
+	"Resposta" : "
     int factorial(int x){
     int res = 1;
-    
+
     if(x==0) return res;
     
     while(x!=1){
@@ -15,5 +13,7 @@
     }
 
     return res;
-    }"
+    }".
+ASD,
+
 }}
