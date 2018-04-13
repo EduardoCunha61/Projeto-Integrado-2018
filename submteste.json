@@ -1,4 +1,4 @@
-{"submissao": {
+{"exercicio": {
 	"Numero Aluno" : "a71940",
 
 	"Resposta" : "
@@ -13,7 +13,5 @@
     }
 
     return res;
-    }".
-ASD,
-
+    }"
 }}
