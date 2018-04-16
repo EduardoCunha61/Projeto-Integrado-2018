@@ -22,7 +22,7 @@ def split_file(file_exerc):
                 if aux[1]:
                     flag = 2
             if not line.endswith(".") or not line:
-                new_lines.append((line+'}'))
+                new_lines.append((line+'}'+','))
             if line.endswith("."):
                 new_lines.append(line[:-1])
     if not end_of_file:
@@ -32,7 +32,10 @@ def split_file(file_exerc):
 # Valida todos os campos do ficheiro de entrada de acordo com a estrutura definida no ficheiro "teste.txt"
 # Esta função tem que ser optimizada, visto que, só retorna um erro de cada vez (Era fixe retornar todos)
 def valida_Exerc(file_ex):
-    split_lines,flag = split_file(file_ex)
+    empty_lines = ["Empty"]*4           #Esta lista é concatenada por causa dos indices nas comporações a seguir
+    output_lines,flag = split_file(file_ex)
+    split_lines = output_lines + empty_lines
+    
     res = []
 
     if flag == 1:
@@ -40,13 +43,13 @@ def valida_Exerc(file_ex):
     elif flag == 2:
         res.append(-5)
 
-    if (not bool(re.match('Enunciado: *{"[^"]*"}', split_lines[0]))):
+    if (not bool(re.match('Enunciado: *{".*"},', split_lines[0], re.DOTALL))):
         res.append(-4)
 
-    if(not bool(re.match('Template: *{".*"\t*}', split_lines[1], re.DOTALL))):
+    if(not bool(re.match('Template: *{".*"\t*},', split_lines[1], re.DOTALL))):
         res.append(-3)
 
-    if (not bool(re.match('Valores de teste: *{(\("[^"]*","[^"]*"\),?)+}', split_lines[2]))):
+    if (not bool(re.match('Valores de teste: *{(\("[^"]*","[^"]*"\),?)+},', split_lines[2]))):
         res.append(-2)              
                 
     if(not bool(re.match('Linguagem: *{"[a-zA-Z]*"}', split_lines[3]))):
@@ -90,7 +93,12 @@ def check_lines(file_exec):
 
 def remove_chavetas(stri):
     stri = stri.replace("{"+"\"","\"")
-    stri = stri.replace("\"" + "}","\"")
+
+    if stri.endswith("\"},"):
+        stri = stri.replace("\"" + "}" + ",","\"")
+    elif stri.endswith("\"}"):
+        stri = stri.replace("\"" + "}","\"")
+
     return stri
 
 # Cria um ficheiro JSON com o formato de exerc.json

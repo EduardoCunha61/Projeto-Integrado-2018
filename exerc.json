@@ -1,6 +1,6 @@
 {"exercicio": {
     
-    "Enunciado" : " Defina a função int factorial(x) que dado um inteiro X,calcula o seu factorial. ",
+    "Enunciado" : " Defina a funcao int factorial(x) que dado um inteiro X,calcula o seu factorial. ",
     
     "Template" : "#include <stdio.h>\n#include <stdlib.h>\nint main(int argc, char **argv){\nint input = atoi(argv[1]);\nint output = atoi(argv[2]);\nif(factorial(input) == output){\nprintf(\"Teste OK! \");\n}\nelse{\nprintf(\"Teste errado!\");\n}\nreturn 0;\n}\n",
 	

@@ -25,7 +25,7 @@ def split_file(file_subm):
                     flag = 5
 
             if not line.endswith(".") or not line:
-                new_lines.append((line+'}'))
+                new_lines.append((line+'}'+','))
 
             if line.endswith("."):
                 new_lines.append(line[:-1])
@@ -37,7 +37,9 @@ def split_file(file_subm):
 # Valida todos os campos do ficheiro de entrada de acordo com a estrutura definida no ficheiro "plain.txt"
 # Esta função tem que ser optimizada, visto que, só retorna um erro de cada vez (Era fixe retornar todos)
 def valida_Subm(file_subm):
-    split_lines,flag = split_file(file_subm) 
+    empty_lines = ["Empty"]*4 
+    output_lines,flag = split_file(file_subm) 
+    split_lines = output_lines + empty_lines
     res = []
 
     if flag == 1:
@@ -45,7 +47,7 @@ def valida_Subm(file_subm):
     elif flag == 5:
         res.append(-5)
 
-    if(not bool(re.match('[nN]umero [aA]luno: *{"[a-zA-Z]?[0-9]{5}"}', split_lines[0]))):                                       
+    if(not bool(re.match('[nN]umero [aA]luno: *{"[a-zA-Z]?[0-9]{5}"},', split_lines[0]))):                                       
         res.append(-2)
     
     if (not bool(re.match('[rR]esposta: *{\".*\"\t*}', split_lines[1], re.DOTALL))):
@@ -75,7 +77,12 @@ def check_lines(file_subm):
 
 def remove_chavetas(stri):
     stri = stri.replace("{"+"\"","\"")
-    stri = stri.replace("\"" + "}","\"")
+
+    if stri.endswith("\"},"):
+        stri = stri.replace("\"" + "}" + ",","\"")
+    elif stri.endswith("\"}"):
+        stri = stri.replace("\"" + "}","\"")
+
     return stri
     
 # Cria um ficheiro JSON com o formato de subm.json
