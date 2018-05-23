@@ -1,38 +1,45 @@
+# -*- coding: utf-8 -*-
 import re
+import sys
+import unicodedata
 
-#TRATAR DOS ACENTOS!!!!
-#INDEX DA LISTA AO VERIFICAR PODE DAR ERRO (CASO NÃO SEJAM DIVIDIDAS EM 2 LINHAS (neste caso))
 
-#PRÓXIMA TAREFA: IR BUSCAR OS VALORES DE TESTE PARA VALIDAR FUNÇÃO
+# TRATAR DOS ACENTOS!!!!
+# Adicionar comentários dentro do código
+# Definir mais exercícios para testar
+# Fazer import/download do python? Procurar sobre isto
+# Definir por email um sistema de submissões! (Mais para a frente!)
 
-# Separa ficheiro de entrada por linhas, sendo dividido por '},\n'.
-# É adicionado o caractér '}' no final de cada linha não vazia e que não termina em '.'
+# Separa ficheiro de entrada por linhas, sendo dividido por '#]\n'.
+# É adicionado o conjunto de caracteres "#]" no final de cada linha não vazia e que não termina em '.'
 def split_file(file_exerc):
     new_lines=[]
-    delim_final = "}."
+    delim_final = "#]."
     flag = 0
     with open(file_exerc) as f:
-        split_lines = f.read().split('},\n')
+        split_lines = f.read().split('#]\n')
         for line in split_lines:
-            end_of_file = re.findall("}\.",line)
+            end_of_file = re.findall("#].",line)
 
             if end_of_file:
                 aux = line.split(delim_final)
                 line = aux[0] + delim_final
                 if aux[1]:
                     flag = 2
+
             if not line.endswith(".") or not line:
-                new_lines.append((line+'}'+','))
+                new_lines.append((line+'#'+']'))
+
             if line.endswith("."):
                 new_lines.append(line[:-1])
+    
     if not end_of_file:
         flag = 1
     return (new_lines,flag)
 
 # Valida todos os campos do ficheiro de entrada de acordo com a estrutura definida no ficheiro "teste.txt"
-# Esta função tem que ser optimizada, visto que, só retorna um erro de cada vez (Era fixe retornar todos)
 def valida_Exerc(file_ex):
-    empty_lines = ["Empty"]*4           #Esta lista é concatenada por causa dos indices nas comporações a seguir
+    empty_lines = ["Empty"]*4           #Esta lista é concatenada por causa dos indices nas comparações a seguir
     output_lines,flag = split_file(file_ex)
     split_lines = output_lines + empty_lines
     
@@ -43,23 +50,23 @@ def valida_Exerc(file_ex):
     elif flag == 2:
         res.append(-5)
 
-    if (not bool(re.match('Enunciado: *{".*"},', split_lines[0], re.DOTALL))):
+    if (not bool(re.match('\[\# *[eE]nunciado: *.* \#\]', split_lines[0], re.DOTALL))):
         res.append(-4)
 
-    if(not bool(re.match('Template: *{".*"\t*},', split_lines[1], re.DOTALL))):
+    if(not bool(re.match('\[\# *[tT]emplate: *.*\#\]', split_lines[1], re.DOTALL))):
         res.append(-3)
 
-    if (not bool(re.match('Valores de teste: *{(\("[^"]*","[^"]*"\),?)+},', split_lines[2]))):
+    if (not bool(re.match('\[\# *[vV]alores de teste: *(\("[^"]*","[^"]*"\),?)+ *\#\]', split_lines[2]))):
         res.append(-2)              
                 
-    if(not bool(re.match('Linguagem: *{"[a-zA-Z]*"}', split_lines[3]))):
+    if(not bool(re.match('\[\# *[lL]inguagem: *[a-zA-Z]* *\#\]', split_lines[3]))):
         res.append(-1)
 
     return res
 
 # Cria uma matriz 2 por numero de campos, sendo que guarda a info neste formato:
 # [["Numero Aluno","a71940"],["Resposta","int factorial(int x){int res = 1;...}"]
-# Todas as chavetas usadas para delimitar cada campo são removidas
+# Todaos os delimitadores "#]" em cada campo são removidos
 
 def check_lines(file_exec):
     new_lines = split_file(file_exec)[0]
@@ -68,13 +75,17 @@ def check_lines(file_exec):
 
     for line in new_lines:
         i = 0
-        str_dividida = line.split(':')
+        sem_delimitadores = remove_delimitador(line)
+        str_dividida = sem_delimitadores.split(':')
 
-        if line==new_lines[2]:
+        str_dividida[0] = check_spaces(str_dividida[0])
+        str_dividida[1] = check_spaces(str_dividida[1])      
+
+        if line == new_lines[2]:
             valores = re.findall(r'\"[^"]*\"', str_dividida[1])
             
             matrix[new_lines.index(line)][0] = "\"" + str_dividida[0] + "\""
-            concat = " {\n"
+            concat = "{\n" 
 
             while i<(len(valores)):
                 concat = concat + "\t\t" + valores[i] + " : " + valores[i+1] + ",\n"
@@ -84,55 +95,61 @@ def check_lines(file_exec):
             matrix[new_lines.index(line)][1] = concat
 
         else: 
-            conteudo_campo = remove_chavetas(str_dividida[1])
-        
             matrix[new_lines.index(line)][0] = "\"" + str_dividida[0] + "\""
-            matrix[new_lines.index(line)][1] = conteudo_campo
+            matrix[new_lines.index(line)][1] = "\"" + str_dividida[1] + "\""
     
     return matrix
 
-def remove_chavetas(stri):
-    stri = stri.replace("{"+"\"","\"")
-
-    if stri.endswith("\"},"):
-        stri = stri.replace("\"" + "}" + ",","\"")
-    elif stri.endswith("\"}"):
-        stri = stri.replace("\"" + "}","\"")
+def check_spaces(stri):
+    if stri[:1] == ' ':
+        l = list(stri)
+        l[0] = ''
+        stri = ''.join(l)
+    
+    if stri[-1:] == ' ':
+        l = list(stri)
+        l[len(stri)-1] = ''
+        stri = ''.join(l)
 
     return stri
 
+def remove_delimitador(stri):
+    first_del = stri.replace("["+"#","")
+    snd_del = first_del.replace("#"+"]","")
+
+    return snd_del
+
 # Cria um ficheiro JSON com o formato de exerc.json
 def criarJSON(matriz_linhas):
-    f = open("testeaux.json","w+")
+    new_file = sys.argv[2].replace(".txt",".json")
+    f = open(new_file,"w+")
     f.write("{\"exercicio\": {\n")
 
     for line in matriz_linhas:
         if line==matriz_linhas[3]:
-            f.write('\t' + line[0] + " :" + line[1] + "\n")
+            f.write('\t' + line[0] + " : " + line[1] + "\n")
         else:
-            f.write('\t' + line[0] + " :" + line[1] + ",\n\n")
+            f.write('\t' + line[0] + " : " + line[1] + ",\n\n")
     f.write("}}")
     f.close()
 
 if __name__ == '__main__':
 
-    res = valida_Exerc('teste.txt')
+    res = valida_Exerc(sys.argv[1])
 
     if not res:
-        print("Ficheiro correto!")
-        criarJSON(check_lines('teste.txt'))
+        criarJSON(check_lines(sys.argv[1]))
 
     for num in reversed(res):
-        print(num)
         if(num==-1):
-            print("LINGUAGEM INVALIDA")
+            print("Invalid language!\n")
         elif(num==-2):
-            print("VALORES DE TESTE INVALIDOS")
+            print("Invalid test values!\n")
         elif(num==-3):
-            print("TEMPLATE INVALIDO")
+            print("Invalid template!\n")
         elif(num==-4):
-            print("ENUNCIADO INVALIDO")
+            print("Invalid statement!\n")
         elif(num==-5):
-            print("Existe codigo posterior a estrutura do ficheiro correta!")
+            print("There is code after the correct structure of the file!\n")
         elif(num==-6):
-            print("Ficheiro nao terminado como esperado! ('}.')")
+            print("File should have ended with '#].'!\n")

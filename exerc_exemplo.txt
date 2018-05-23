@@ -1,0 +1,8 @@
+[# Enunciado: Cria o fatorial de um dado inteiro X #]
+[# Template:
+	int main(){
+	x = 2
+	print(%d,factorial(x))			
+	} #]
+[# Valores de teste: ("2","2"),("0","1") #]
+[# Linguagem: PYTHON #].

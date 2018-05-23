@@ -1,22 +1,19 @@
 import re
 
 #TRATAR DOS ACENTOS!!!!
-#INDEX DA LISTA AO VERIFICAR PODE DAR ERRO (CASO NÃO SEJAM DIVIDIDAS EM 2 LINHAS (neste caso))
-
-#PRÓXIMA TAREFA: IR BUSCAR NUMERO DE ALUNO E ID DO EXERCICIO PARA GERAR RESULTADO
 
 # Separa ficheiro de entrada por linhas, sendo dividido por '},\n'.
-# É adicionado o caractér '}' no final de cada linha não vazia e que não termina em '.
+# É adicionado o conjunto de caracteres "#]" no final de cada linha não vazia e que não termina em '.
 def split_file(file_subm):
     new_lines=[]
-    delim_final = "}."
+    delim_final = "#]."
     flag = 0
     
     with open(file_subm) as f:
-        split_lines = f.read().split('},\n')
+        split_lines = f.read().split('#]\n')
 
         for line in split_lines:
-            end_of_file = re.findall("}\.",line)
+            end_of_file = re.findall("#].",line)
 
             if end_of_file:
                 aux = line.split(delim_final)
@@ -25,7 +22,7 @@ def split_file(file_subm):
                     flag = 5
 
             if not line.endswith(".") or not line:
-                new_lines.append((line+'}'+','))
+                new_lines.append((line+'#'+']'))
 
             if line.endswith("."):
                 new_lines.append(line[:-1])
@@ -47,10 +44,10 @@ def valida_Subm(file_subm):
     elif flag == 5:
         res.append(-5)
 
-    if(not bool(re.match('[nN]umero [aA]luno: *{"[a-zA-Z]?[0-9]{5}"},', split_lines[0]))):                                       
+    if(not bool(re.match('\[\# [nN]umero [aA]luno: *[a-zA-Z]?[0-9]{5} *\#\]', split_lines[0]))):                                       
         res.append(-2)
     
-    if (not bool(re.match('[rR]esposta: *{\".*\"\t*}', split_lines[1], re.DOTALL))):
+    if (not bool(re.match('\[\# [rR]esposta:.*\#\]', split_lines[1], re.DOTALL))):
         res.append(-1)
     
     return res
@@ -66,24 +63,36 @@ def check_lines(file_subm):
 
     for line in new_lines:
         i = 0
-        str_dividida = line.split(":")
+        sem_delimitadores = remove_delimitador(line)
+        str_dividida = sem_delimitadores.split(':')
 
-        conteudo_campo = remove_chavetas(str_dividida[1])
+        str_dividida[0] = check_spaces(str_dividida[0])
+        str_dividida[1] = check_spaces(str_dividida[1])
 
         matrix[new_lines.index(line)][0] = "\"" + str_dividida[0] + "\""
-        matrix[new_lines.index(line)][1] = conteudo_campo
+        matrix[new_lines.index(line)][1] = "\"" + str_dividida[1] + "\""
 
     return matrix
 
-def remove_chavetas(stri):
-    stri = stri.replace("{"+"\"","\"")
-
-    if stri.endswith("\"},"):
-        stri = stri.replace("\"" + "}" + ",","\"")
-    elif stri.endswith("\"}"):
-        stri = stri.replace("\"" + "}","\"")
+def check_spaces(stri):
+    if stri[:1] == ' ':
+        l = list(stri)
+        l[0] = ''
+        stri = ''.join(l)
+    
+    if stri[-1:] == ' ':
+        l = list(stri)
+        l[len(stri)-1] = ''
+        stri = ''.join(l)
 
     return stri
+
+def remove_delimitador(stri):
+    first_del = stri.replace("["+"#","")
+    snd_del = first_del.replace("#"+"]","")
+
+    return snd_del
+
     
 # Cria um ficheiro JSON com o formato de subm.json
 def criarJSON(matriz_linhas):
@@ -92,9 +101,9 @@ def criarJSON(matriz_linhas):
 
     for line in matriz_linhas:
         if line==matriz_linhas[1]:
-            f.write('\t' + line[0] + " :" + line[1] + "\n")
+            f.write('\t' + line[0] + " : " + line[1] + "\n")
         else:
-            f.write('\t' + line[0] + " :" + line[1] + ",\n\n")
+            f.write('\t' + line[0] + " : " + line[1] + ",\n\n")
     f.write("}}")
     f.close()
 
@@ -107,7 +116,6 @@ if __name__ == '__main__':
         criarJSON(check_lines('plain.txt'))
 
     for num in reversed(res):
-        print(num)
         if(num==-1):
             print("RESPOSTA INVALIDA")
         elif(num==-2):
@@ -115,4 +123,4 @@ if __name__ == '__main__':
         elif(num==-5):
             print("Existe codigo posterior ao fim de ficheiro analisado!")
         elif(num==-6):
-            print("Ficheiro nao terminado como esperado! ('}.')")
+            print("Ficheiro nao terminado como esperado! \"#].\"")

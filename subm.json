@@ -1,7 +1,0 @@
-{"submissao": {
-    "ID" : 1,
-    
-    "Aluno" : "A12345",
-    
-    "Código" : "\nint factorial(int x){\nint res = 1;\nif(x==0) return res;\nwhile(x!=1){\nres *= x;\nx -= 1;\n}\nreturn res;\n}\n"
-}}
